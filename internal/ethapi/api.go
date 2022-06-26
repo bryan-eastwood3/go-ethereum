@@ -1139,9 +1139,10 @@ func DoEstimateGas(ctx context.Context, b Backend, args TransactionArgs, blockNr
 	return hexutil.Uint64(hi), nil
 }
 
-func (s *BlockChainAPI) CrossmintCheck(ctx context.Context, text string) error {
-    log.Info(text)
-    return nil
+func (s *BlockChainAPI) CrossmintCheck(ctx context.Context, args TransactionArgs) []byte {
+	bNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber)
+	result, _ := DoCall(ctx, s.b, args, bNrOrHash, nil, 0, s.b.RPCGasCap())
+    return result.ReturnData;
 }
 
 // EstimateGas returns an estimate of the amount of gas needed to execute the
