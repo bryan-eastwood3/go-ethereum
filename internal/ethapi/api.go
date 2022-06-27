@@ -27,6 +27,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
 	"github.com/ethereum/go-ethereum/common"
@@ -1139,10 +1140,11 @@ func DoEstimateGas(ctx context.Context, b Backend, args TransactionArgs, blockNr
 	return hexutil.Uint64(hi), nil
 }
 
-func (s *BlockChainAPI) CrossmintCheck(ctx context.Context, args TransactionArgs) core.ExecutionResult {
-	bNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber)
-	result, _ := DoCall(ctx, s.b, args, bNrOrHash, nil, 0, s.b.RPCGasCap())
-    return *result;
+func (s *BlockChainAPI) CrossmintCheck(ctx context.Context, args TransactionArgs) ([]*types.Log) {
+	sb := backends.NewSimulatedBackendWithDatabase(s.b.ChainDb(), core.DefaultRinkebyGenesisBlock().Alloc, 100000);
+	transaction := args.ToTransaction();
+	receipt, _ := sb.TransactionReceipt(ctx, transaction.Hash())
+	return receipt.Logs;
 }
 
 // EstimateGas returns an estimate of the amount of gas needed to execute the
